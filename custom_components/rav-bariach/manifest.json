@@ -1,0 +1,18 @@
+{
+    "domain": "rav-bariach",
+    "name": "Rav Bariach:",
+    "codeowners": [
+        "@Smart-RD"
+    ],
+    "config_flow": true,
+    "dependencies": [
+        "http"
+    ],
+    "documentation": "https://github.com/Rav-Bariach-Locks/rav-bariach-home-assistant",
+    "iot_class": "cloud_push",
+    "issue_tracker": "https://github.com/Rav-Bariach-Locks/rav-bariach-home-assistant/issues",
+    "requirements": [
+        "PyJWT==2.10.1"
+    ],
+    "version": "1.0.2"
+}

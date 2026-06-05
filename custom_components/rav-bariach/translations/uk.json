@@ -1,0 +1,37 @@
+{
+    "exceptions": {
+        "auth_failed": {
+            "message": "Помилка автентифікації. Будь ласка, перевірте налаштування."
+        },
+        "connection_error": {
+            "message": "Не вдалося встановити зв’язок із Rav Bariach: {error}"
+        },
+        "command_failed": {
+            "message": "Не вдалося надіслати команду! Помилка: {server_msg}"
+        },
+        "code_required": {
+            "message": "З міркувань безпеки потрібно ввести код для розблокування."
+        }
+    },
+    "entity": {
+        "sensor": {
+            "battery_status": {
+                "name": "Рівень батареї"
+            },
+            "lock_status": {
+                "name": "Стан замка",
+                "state": {
+                    "locked": "Зачинено",
+                    "unlocked": "Відчинено"
+                }
+            },
+            "hub_status": {
+                "name": "Підключення хаба",
+                "state": {
+                    "online": "Підключено",
+                    "offline": "Відключено"
+                }
+            }
+        }
+    }
+}

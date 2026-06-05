@@ -1,0 +1,37 @@
+{
+    "exceptions": {
+        "auth_failed": {
+            "message": "Błąd uwierzytelniania. Sprawdź konfigurację."
+        },
+        "connection_error": {
+            "message": "Nie można połączyć się z Rav Bariach: {error}"
+        },
+        "command_failed": {
+            "message": "Nie udało się wysłać polecenia! Błąd: {server_msg}"
+        },
+        "code_required": {
+            "message": "Ze względów bezpieczeństwa musisz wprowadzić kod, aby odblokować."
+        }
+    },
+    "entity": {
+        "sensor": {
+            "battery_status": {
+                "name": "Poziom baterii"
+            },
+            "lock_status": {
+                "name": "Stan zamka",
+                "state": {
+                    "locked": "Zablokowany",
+                    "unlocked": "Odblokowany"
+                }
+            },
+            "hub_status": {
+                "name": "Połączenie huba",
+                "state": {
+                    "online": "Połączony",
+                    "offline": "Rozłączony"
+                }
+            }
+        }
+    }
+}

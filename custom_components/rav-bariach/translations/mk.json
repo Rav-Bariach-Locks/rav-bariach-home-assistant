@@ -1,0 +1,37 @@
+{
+    "exceptions": {
+        "auth_failed": {
+            "message": "Автентикацијата не успеа. Ве молиме проверете ја конфигурацијата."
+        },
+        "connection_error": {
+            "message": "Не може да се воспостави комуникација со Rav Bariach: {error}"
+        },
+        "command_failed": {
+            "message": "Испраќањето на командата не успеа! Грешка: {server_msg}"
+        },
+        "code_required": {
+            "message": "Од безбедносни причини мора да внесете код за отклучување."
+        }
+    },
+    "entity": {
+        "sensor": {
+            "battery_status": {
+                "name": "Ниво на батерија"
+            },
+            "lock_status": {
+                "name": "Статус на брава",
+                "state": {
+                    "locked": "Заклучено",
+                    "unlocked": "Отклучено"
+                }
+            },
+            "hub_status": {
+                "name": "Поврзаност со хаб",
+                "state": {
+                    "online": "Поврзано",
+                    "offline": "Неповрзано"
+                }
+            }
+        }
+    }
+}

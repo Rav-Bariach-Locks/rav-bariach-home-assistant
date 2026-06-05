@@ -1,0 +1,37 @@
+{
+    "exceptions": {
+        "auth_failed": {
+            "message": "Authenticatie mislukt. Controleer de configuratie."
+        },
+        "connection_error": {
+            "message": "Kan geen verbinding maken met Rav Bariach: {error}"
+        },
+        "command_failed": {
+            "message": "Verzenden van opdracht mislukt! Fout: {server_msg}"
+        },
+        "code_required": {
+            "message": "Om veiligheidsredenen moet u een code invoeren om te ontgrendelen."
+        }
+    },
+    "entity": {
+        "sensor": {
+            "battery_status": {
+                "name": "Batterijniveau"
+            },
+            "lock_status": {
+                "name": "Slotstatus",
+                "state": {
+                    "locked": "Vergrendeld",
+                    "unlocked": "Ontgrendeld"
+                }
+            },
+            "hub_status": {
+                "name": "Hubverbinding",
+                "state": {
+                    "online": "Verbonden",
+                    "offline": "Niet verbonden"
+                }
+            }
+        }
+    }
+}

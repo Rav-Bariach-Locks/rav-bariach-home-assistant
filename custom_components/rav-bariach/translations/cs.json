@@ -1,0 +1,37 @@
+{
+    "exceptions": {
+        "auth_failed": {
+            "message": "Autentizace selhala. Zkontrolujte prosím konfiguraci."
+        },
+        "connection_error": {
+            "message": "Nelze komunikovat se službou Rav Bariach: {error}"
+        },
+        "command_failed": {
+            "message": "Nepodařilo se odeslat příkaz! Chyba: {server_msg}"
+        },
+        "code_required": {
+            "message": "Z bezpečnostních důvodů musíte pro odemknutí zadat kód."
+        }
+    },
+    "entity": {
+        "sensor": {
+            "battery_status": {
+                "name": "Úroveň baterie"
+            },
+            "lock_status": {
+                "name": "Stav zámku",
+                "state": {
+                    "locked": "Uzamčeno",
+                    "unlocked": "Odemčeno"
+                }
+            },
+            "hub_status": {
+                "name": "Připojení hubu",
+                "state": {
+                    "online": "Připojeno",
+                    "offline": "Odpojeno"
+                }
+            }
+        }
+    }
+}

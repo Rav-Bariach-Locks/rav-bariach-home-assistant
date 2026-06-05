@@ -1,0 +1,37 @@
+{
+    "exceptions": {
+        "auth_failed": {
+            "message": "Autentifikacija nije uspjela. Provjerite konfiguraciju."
+        },
+        "connection_error": {
+            "message": "Nije moguće uspostaviti komunikaciju s Rav Bariach: {error}"
+        },
+        "command_failed": {
+            "message": "Slanje naredbe nije uspjelo! Greška: {server_msg}"
+        },
+        "code_required": {
+            "message": "Iz sigurnosnih razloga morate unijeti kod za otključavanje."
+        }
+    },
+    "entity": {
+        "sensor": {
+            "battery_status": {
+                "name": "Razina baterije"
+            },
+            "lock_status": {
+                "name": "Status brave",
+                "state": {
+                    "locked": "Zaključano",
+                    "unlocked": "Otključano"
+                }
+            },
+            "hub_status": {
+                "name": "Povezivanje huba",
+                "state": {
+                    "online": "Povezano",
+                    "offline": "Nepovezano"
+                }
+            }
+        }
+    }
+}

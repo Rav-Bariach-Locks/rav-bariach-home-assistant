@@ -1,0 +1,37 @@
+{
+    "exceptions": {
+        "auth_failed": {
+            "message": "Authentifizierung fehlgeschlagen. Bitte überprüfen Sie die Konfiguration."
+        },
+        "connection_error": {
+            "message": "Keine Verbindung zu Rav Bariach: möglich: {error}"
+        },
+        "command_failed": {
+            "message": "Befehl konnte nicht gesendet werden! Fehler: {server_msg}"
+        },
+        "code_required": {
+            "message": "Aus Sicherheitsgründen müssen Sie einen Code zum Entsperren eingeben."
+        }
+    },
+    "entity": {
+        "sensor": {
+            "battery_status": {
+                "name": "Batteriestand"
+            },
+            "lock_status": {
+                "name": "Schlossstatus",
+                "state": {
+                    "locked": "Gesperrt",
+                    "unlocked": "Entsperrt"
+                }
+            },
+            "hub_status": {
+                "name": "Hub-Verbindung",
+                "state": {
+                    "online": "Verbunden",
+                    "offline": "Getrennt"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,37 @@
+{
+    "exceptions": {
+        "auth_failed": {
+            "message": "Kimlik doğrulama uğursuz oldu. Zəhmət olmasa konfiqurasiyanı yoxlayın."
+        },
+        "connection_error": {
+            "message": "Rav Bariach: ilə əlaqə qurula bilmədi: {error}"
+        },
+        "command_failed": {
+            "message": "Komanda göndərilə bilmədi! Xəta: {server_msg}"
+        },
+        "code_required": {
+            "message": "Təhlükəsizlik səbəbilə kilidi açmaq üçün kod daxil etməlisiniz."
+        }
+    },
+    "entity": {
+        "sensor": {
+            "battery_status": {
+                "name": "Batareya səviyyəsi"
+            },
+            "lock_status": {
+                "name": "Kilid vəziyyəti",
+                "state": {
+                    "locked": "Kilidlənib",
+                    "unlocked": "Kilidsiz"
+                }
+            },
+            "hub_status": {
+                "name": "Hub bağlantısı",
+                "state": {
+                    "online": "Qoşulub",
+                    "offline": "Bağlantı yoxdur"
+                }
+            }
+        }
+    }
+}

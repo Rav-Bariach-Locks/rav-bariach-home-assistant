@@ -1,0 +1,37 @@
+{
+    "exceptions": {
+        "auth_failed": {
+            "message": "Falha na autenticação. Por favor, verifique a configuração."
+        },
+        "connection_error": {
+            "message": "Não foi possível comunicar com o Rav Bariach: {error}"
+        },
+        "command_failed": {
+            "message": "Falha ao enviar comando! Erro: {server_msg}"
+        },
+        "code_required": {
+            "message": "Por motivos de segurança, deve introduzir um código para desbloquear."
+        }
+    },
+    "entity": {
+        "sensor": {
+            "battery_status": {
+                "name": "Nível da bateria"
+            },
+            "lock_status": {
+                "name": "Estado da fechadura",
+                "state": {
+                    "locked": "Bloqueado",
+                    "unlocked": "Desbloqueado"
+                }
+            },
+            "hub_status": {
+                "name": "Ligação do hub",
+                "state": {
+                    "online": "Ligado",
+                    "offline": "Desligado"
+                }
+            }
+        }
+    }
+}
