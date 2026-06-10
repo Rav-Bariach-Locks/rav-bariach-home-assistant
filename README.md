@@ -16,19 +16,19 @@ This custom integration allows you to control and monitor your **Rav Bariach Loc
 
 ---
 
-## ✨ Features
+## Features
 
-* 🚪 **Smart Lock Control:** Securely lock or unlock your Rav Bariach doors with ease.
-* 🔌 **Smart Relays:** Control additional RB modules and integrated features.
-* 📊 **Real-time Status:** Monitor door status, connectivity, and alarm states instantly.
+*  **Smart Lock Control:** Securely lock or unlock your Rav Bariach doors with ease.
+*  **Smart Relays:** Control additional RB modules and integrated features.
+*  **Real-time Status:** Monitor door status, connectivity, and alarm states instantly.
 
 ---
 
-## 🚀 Installation
+##  Installation
 
-### 🛠️ Method: HACS (Custom Repository)
+### Method: HACS (Custom Repository)
 
-While this integration is pending official HACS inclusion, you can easily add it as a custom repository:
+[![](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Smart-RD&repository=rav-bariach-home-assistant&category=Integration)
 
 1. Navigate to **HACS** in your Home Assistant sidebar.
 2. Click the **three dots** (`⋮`) in the top-right corner and select **Custom repositories**.
@@ -39,7 +39,7 @@ While this integration is pending official HACS inclusion, you can easily add it
 
 ---
 
-## ⚙️ Configuration
+##  Configuration
 
 This integration is configured entirely via the Home Assistant UI (Config Flow). No YAML editing is required!
 
@@ -51,17 +51,13 @@ This integration is configured entirely via the Home Assistant UI (Config Flow).
 
 ---
 
-## ⚠️ Important Notes
-
 > [!WARNING]  
 > **Cloud Dependency:** This integration requires your Rav Bariach system to be connected to the internet and cloud services to be active. It relies on the cloud API to communicate with your locks.
 
 ---
 
-## 🤝 Support and Contribution
+##  Support and Contribution
 
 If you experience any issues or need help setting up your integration, please reach out to our support team:
 
-* 📧 **[omer_y@rav-bariach.com](mailto:omer_y@rav-bariach.com)**
-* 📧 **[moran_g@rav-bariach.com](mailto:moran_g@rav-bariach.com)**
-* 📧 **[moti_l@rav-bariach.com](mailto:moti_l@rav-bariach.com)**
+*  **[Contact the Support Team](mailto:omer_y@rav-bariach.com,moran_g@rav-bariach.com,moti_l@rav-bariach.com)**
