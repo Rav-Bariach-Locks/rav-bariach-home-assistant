@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Rav-Bariach-Locks/rav-bariach-home-assistant/master/custom_components/rav-bariach/brand/logo.png" width="120" alt="RB Logo">
+  <img src="https://raw.githubusercontent.com/Rav-Bariach-Locks/rav-bariach-home-assistant/master/custom_components/rav_bariach/brand/logo.png" width="120" alt="RB Logo">
 </p>
 
 <h1 align="center">Rav Bariach Integration for Home Assistant</h1>
