@@ -28,7 +28,7 @@ This custom integration allows you to control and monitor your **Rav Bariach Loc
 
 ### Method: HACS (Custom Repository)
 
-[![](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Smart-RD&repository=rav-bariach-home-assistant&category=Integration)
+[![](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Rav-Bariach-Locks&repository=rav-bariach-home-assistant&category=Integration)
 
 1. Navigate to **HACS** in your Home Assistant sidebar.
 2. Click the **three dots** (`⋮`) in the top-right corner and select **Custom repositories**.
