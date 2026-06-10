@@ -2,7 +2,7 @@
     "domain": "rav-bariach",
     "name": "Rav Bariach",
     "codeowners": [
-        "@Smart-RD"
+        "@Rav-Bariach-Locks"
     ],
     "config_flow": true,
     "dependencies": [
