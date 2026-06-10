@@ -1,6 +1,6 @@
 {
     "domain": "rav-bariach",
-    "name": "Rav Bariach:",
+    "name": "Rav Bariach",
     "codeowners": [
         "@Smart-RD"
     ],
@@ -14,5 +14,5 @@
     "requirements": [
         "PyJWT==2.10.1"
     ],
-    "version": "1.0.2"
+    "version": "1.0.0"
 }
