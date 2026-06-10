@@ -4,7 +4,7 @@ from homeassistant.const import Platform
 
 MANUFACTURER = "Rav Bariach Smart Lock and Security Systems"
 DEFAULT_NAME = "Rav Bariach Smart"
-DOMAIN = "rav-bariach"
+DOMAIN = "rav_bariach"
 
 LOGIN_METHODS = ["phone", "email"]
 DEFAULT_LOGIN_METHOD = "email"
