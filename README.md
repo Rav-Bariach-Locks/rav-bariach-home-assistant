@@ -9,7 +9,6 @@
     <img src="https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge" alt="HACS Custom">
   </a>
   <img src="https://img.shields.io/badge/Home%20Assistant-Compatible-blue.svg?style=for-the-badge&logo=home-assistant" alt="Home Assistant">
-  <img src="https://img.shields.io/badge/Cloud-Required-success.svg?style=for-the-badge&logo=icloud" alt="Cloud Dependent">
 </p>
 
 This custom integration allows you to control and monitor your **Rav Bariach Lock** systems directly from Home Assistant. Automate your home security and keep your peace of mind in one central dashboard.
