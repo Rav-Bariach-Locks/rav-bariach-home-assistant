@@ -11,6 +11,9 @@
         },
         "code_required": {
             "message": "Təhlükəsizlik səbəbilə kilidi açmaq üçün kod daxil etməlisiniz."
+        },
+        "rate_limit_exceeded": {
+            "message": "Token yeniləmə limitinə çatıldı. Daha sonra yenidən cəhd ediləcək."
         }
     },
     "entity": {
@@ -32,6 +35,12 @@
                     "offline": "Bağlantı yoxdur"
                 }
             }
+        }
+    },
+    "issues": {
+        "unsupported_version": {
+            "title": "Dəstəklənməyən Home Assistant versiyası",
+            "description": "Home Assistant versiyanız çox köhnə olduğu üçün Rav Bariach inteqrasiyasını işə salmaq mümkün olmadı.\n\nTəfərrüatlar: {error_detail}\n\nBu problemi həll etmək üçün sisteminizi yeniləyin."
         }
     }
 }

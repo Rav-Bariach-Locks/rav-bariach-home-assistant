@@ -11,6 +11,9 @@
         },
         "code_required": {
             "message": "Iz varnostnih razlogov morate za odklep vnesti kodo."
+        },
+        "rate_limit_exceeded": {
+            "message": "Dosežena je bila omejitev osveževanja žetona. Poskus bo ponovljen pozneje."
         }
     },
     "entity": {
@@ -32,6 +35,12 @@
                     "offline": "Nepovezano"
                 }
             }
+        }
+    },
+    "issues": {
+        "unsupported_version": {
+            "title": "Nepodprta različica Home Assistant",
+            "description": "Integracije Rav Bariach ni bilo mogoče zagnati, ker je vaša različica Home Assistant prestara.\n\nPodrobnosti: {error_detail}\n\nPosodobite sistem, da odpravite to težavo."
         }
     }
 }

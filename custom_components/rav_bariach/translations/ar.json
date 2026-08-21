@@ -11,6 +11,9 @@
         },
         "code_required": {
             "message": "لأسباب أمنية يجب إدخال رمز لفتح القفل."
+        },
+        "rate_limit_exceeded": {
+            "message": "تم الوصول إلى الحد الأقصى لتحديث الرمز المميز. ستتم إعادة المحاولة لاحقًا."
         }
     },
     "entity": {
@@ -32,6 +35,12 @@
                     "offline": "غير متصل"
                 }
             }
+        }
+    },
+    "issues": {
+        "unsupported_version": {
+            "title": "إصدار Home Assistant غير مدعوم",
+            "description": "تعذر تشغيل تكامل Rav Bariach لأن إصدار Home Assistant لديك قديم جدًا.\n\nالتفاصيل: {error_detail}\n\nيرجى تحديث النظام لحل هذه المشكلة."
         }
     }
 }

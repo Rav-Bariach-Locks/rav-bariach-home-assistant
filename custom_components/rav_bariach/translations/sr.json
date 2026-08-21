@@ -11,6 +11,9 @@
         },
         "code_required": {
             "message": "Iz bezbednosnih razloga morate uneti kod za otključavanje."
+        },
+        "rate_limit_exceeded": {
+            "message": "Dostignuto je ograničenje za osvežavanje tokena. Ponovni pokušaj će biti izvršen kasnije."
         }
     },
     "entity": {
@@ -32,6 +35,12 @@
                     "offline": "Nije povezano"
                 }
             }
+        }
+    },
+    "issues": {
+        "unsupported_version": {
+            "title": "Nepodržana verzija Home Assistant-a",
+            "description": "Rav Bariach integracija nije mogla da se pokrene jer je vaša verzija Home Assistant-a prestara.\n\nDetalji: {error_detail}\n\nAžurirajte sistem da biste rešili ovaj problem."
         }
     }
 }

@@ -11,6 +11,9 @@
         },
         "code_required": {
             "message": "Pour des raisons de sécurité, vous devez saisir un code pour déverrouiller."
+        },
+        "rate_limit_exceeded": {
+            "message": "La limite d'actualisation du jeton a été atteinte. Une nouvelle tentative sera effectuée ultérieurement."
         }
     },
     "entity": {
@@ -32,6 +35,12 @@
                     "offline": "Déconnecté"
                 }
             }
+        }
+    },
+    "issues": {
+        "unsupported_version": {
+            "title": "Version de Home Assistant non prise en charge",
+            "description": "L'intégration Rav Bariach n'a pas pu être démarrée, car votre version de Home Assistant est trop ancienne.\n\nDétails : {error_detail}\n\nVeuillez mettre à jour votre système pour résoudre ce problème."
         }
     }
 }

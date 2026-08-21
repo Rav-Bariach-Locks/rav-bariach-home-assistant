@@ -11,6 +11,9 @@
         },
         "code_required": {
             "message": "Güvenlik nedeniyle açarken şifre girmelisiniz."
+        },
+        "rate_limit_exceeded": {
+            "message": "Token yenileme limitine ulaşıldı. Daha sonra tekrar denenecek."
         }
     },
     "entity": {
@@ -25,13 +28,19 @@
                     "unlocked": "Kilitli Değil"
                 }
             },
-            "hub_status" : {
-            "name"  : "Köprü Bağlantısı",
-            "state" : {
-                "online" : "Bağlı",
-                "offline" :"Bağlantı Yok"
+            "hub_status": {
+                "name": "Köprü Bağlantısı",
+                "state": {
+                    "online": "Bağlı",
+                    "offline": "Bağlantı Yok"
+                }
             }
-            }
+        }
+    },
+    "issues": {
+        "unsupported_version": {
+            "title": "Desteklenmeyen Home Assistant Sürümü",
+            "description": "Home Assistant sürümünüz çok eski olduğu için Rav Bariach entegrasyonu başlatılamadı.\n\nAyrıntılar: {error_detail}\n\nBu sorunu çözmek için lütfen sisteminizi güncelleyin."
         }
     }
 }

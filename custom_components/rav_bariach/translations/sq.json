@@ -11,6 +11,9 @@
         },
         "code_required": {
             "message": "Për arsye sigurie, duhet të vendosni një kod për të zhbllokuar."
+        },
+        "rate_limit_exceeded": {
+            "message": "Është arritur kufiri i rifreskimit të tokenit. Do të provohet përsëri më vonë."
         }
     },
     "entity": {
@@ -32,6 +35,12 @@
                     "offline": "I palidhur"
                 }
             }
+        }
+    },
+    "issues": {
+        "unsupported_version": {
+            "title": "Version i pambështetur i Home Assistant",
+            "description": "Integrimi Rav Bariach nuk mund të nisej sepse versioni juaj i Home Assistant është shumë i vjetër.\n\nDetaje: {error_detail}\n\nJu lutemi përditësoni sistemin tuaj për ta zgjidhur këtë problem."
         }
     }
 }

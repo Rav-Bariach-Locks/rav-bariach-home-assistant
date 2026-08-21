@@ -11,6 +11,9 @@
         },
         "code_required": {
             "message": "Per motivi di sicurezza è necessario inserire un codice per lo sblocco."
+        },
+        "rate_limit_exceeded": {
+            "message": "È stato raggiunto il limite di aggiornamento del token. Verrà effettuato un nuovo tentativo più tardi."
         }
     },
     "entity": {
@@ -32,6 +35,12 @@
                     "offline": "Disconnesso"
                 }
             }
+        }
+    },
+    "issues": {
+        "unsupported_version": {
+            "title": "Versione di Home Assistant non supportata",
+            "description": "Non è stato possibile avviare l'integrazione Rav Bariach perché la versione di Home Assistant è troppo vecchia.\n\nDettagli: {error_detail}\n\nAggiorna il sistema per risolvere il problema."
         }
     }
 }

@@ -11,6 +11,9 @@
         },
         "code_required": {
             "message": "Ze względów bezpieczeństwa musisz wprowadzić kod, aby odblokować."
+        },
+        "rate_limit_exceeded": {
+            "message": "Osiągnięto limit odświeżania tokenu. Ponowna próba nastąpi później."
         }
     },
     "entity": {
@@ -32,6 +35,12 @@
                     "offline": "Rozłączony"
                 }
             }
+        }
+    },
+    "issues": {
+        "unsupported_version": {
+            "title": "Nieobsługiwana wersja Home Assistant",
+            "description": "Nie można uruchomić integracji Rav Bariach, ponieważ Twoja wersja Home Assistant jest zbyt stara.\n\nSzczegóły: {error_detail}\n\nZaktualizuj system, aby rozwiązać ten problem."
         }
     }
 }

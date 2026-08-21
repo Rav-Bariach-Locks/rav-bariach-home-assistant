@@ -11,6 +11,9 @@
         },
         "code_required": {
             "message": "Z bezpečnostních důvodů musíte pro odemknutí zadat kód."
+        },
+        "rate_limit_exceeded": {
+            "message": "Byl dosažen limit pro obnovení tokenu. Opakování proběhne později."
         }
     },
     "entity": {
@@ -32,6 +35,12 @@
                     "offline": "Odpojeno"
                 }
             }
+        }
+    },
+    "issues": {
+        "unsupported_version": {
+            "title": "Nepodporovaná verze Home Assistant",
+            "description": "Integraci Desi se nepodařilo spustit, protože vaše verze Home Assistant je příliš stará.\n\nPodrobnosti: {error_detail}\n\nAktualizujte prosím svůj systém, abyste tento problém vyřešili."
         }
     }
 }

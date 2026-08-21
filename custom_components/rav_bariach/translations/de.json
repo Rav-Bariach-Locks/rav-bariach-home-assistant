@@ -11,6 +11,9 @@
         },
         "code_required": {
             "message": "Aus Sicherheitsgründen müssen Sie einen Code zum Entsperren eingeben."
+        },
+        "rate_limit_exceeded": {
+            "message": "Das Limit für die Token-Aktualisierung wurde erreicht. Ein erneuter Versuch erfolgt später."
         }
     },
     "entity": {
@@ -32,6 +35,12 @@
                     "offline": "Getrennt"
                 }
             }
+        }
+    },
+    "issues": {
+        "unsupported_version": {
+            "title": "Nicht unterstützte Home-Assistant-Version",
+            "description": "Die Rav Bariach-Integration konnte nicht gestartet werden, da Ihre Home-Assistant-Version zu alt ist.\n\nDetails: {error_detail}\n\nBitte aktualisieren Sie Ihr System, um dieses Problem zu beheben."
         }
     }
 }

@@ -11,6 +11,9 @@
         },
         "code_required": {
             "message": "Z bezpečnostných dôvodov musíte na odomknutie zadať kód."
+        },
+        "rate_limit_exceeded": {
+            "message": "Bol dosiahnutý limit obnovovania tokenu. Ďalší pokus bude vykonaný neskôr."
         }
     },
     "entity": {
@@ -32,6 +35,12 @@
                     "offline": "Odpojené"
                 }
             }
+        }
+    },
+    "issues": {
+        "unsupported_version": {
+            "title": "Nepodporovaná verzia Home Assistant",
+            "description": "Integráciu Rav Bariach sa nepodarilo spustiť, pretože vaša verzia Home Assistant je príliš stará.\n\nPodrobnosti: {error_detail}\n\nAktualizujte svoj systém, aby ste tento problém vyriešili."
         }
     }
 }

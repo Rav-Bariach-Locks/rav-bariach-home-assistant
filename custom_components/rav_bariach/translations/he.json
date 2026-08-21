@@ -11,6 +11,9 @@
         },
         "code_required": {
             "message": "מטעמי אבטחה יש להזין קוד לפתיחה."
+        },
+        "rate_limit_exceeded": {
+            "message": "הגעת למגבלת רענון האסימון. ניסיון נוסף יתבצע מאוחר יותר."
         }
     },
     "entity": {
@@ -32,6 +35,12 @@
                     "offline": "מנותק"
                 }
             }
+        }
+    },
+    "issues": {
+        "unsupported_version": {
+            "title": "גרסה לא נתמכת של Home Assistant",
+            "description": "לא ניתן היה להפעיל את האינטגרציה של Rav Bariach מכיוון שגרסת Home Assistant שלך ישנה מדי.\n\nפרטים: {error_detail}\n\nאנא עדכן את המערכת שלך כדי לפתור בעיה זו."
         }
     }
 }
