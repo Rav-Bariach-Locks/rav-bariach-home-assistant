@@ -1,165 +1,132 @@
-"""The Rav Bariach Integration."""
+"""Config flow for Rav Bariach OAuth2 integration."""
 
-from __future__ import annotations
-
+import base64
+import hashlib
 import logging
+import secrets
 
-import aiohttp
+import jwt
 
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.helpers import config_entry_oauth2_flow
-from homeassistant.helpers.entity_platform import ConfigEntryAuthFailed
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.network import get_url
 
-from .config_flow import RavBariachOauth2Implementation
-from .const import AUTH_URI, DOMAIN, FULLFILMENT_API_URI, PUBLIC_ID, TOKEN_URI
-from .coordinator import RavBariachDataUpdateCoordinator
-from .gateway import RavBariachGateway
+from .const import AUTH_URI, DOMAIN, PUBLIC_ID, TOKEN_URI
 
 _LOGGER = logging.getLogger(__name__)
 
 
-PLATFORMS: list[Platform] = [
-    Platform.LOCK,
-    Platform.SENSOR
-]
-
-
-async def async_setup(hass: HomeAssistant, config: dict) -> bool:
-    """OAuth provider implementation."""
-
-    implementation = RavBariachOauth2Implementation(
-        hass,
-        DOMAIN,
-        PUBLIC_ID,
-        AUTH_URI,
-        TOKEN_URI,
+def generate_pkce_pair():
+    code_verifier = (
+        base64.urlsafe_b64encode(secrets.token_bytes(32)).rstrip(b"=").decode("utf-8")
     )
 
-    config_entry_oauth2_flow.async_register_implementation(
-        hass,
-        DOMAIN,
-        implementation,
+
+    code_challenge = (
+        base64.urlsafe_b64encode(hashlib.sha256(code_verifier.encode()).digest())
+        .rstrip(b"=")
+        .decode("utf-8")
     )
 
-    return True
+    return code_verifier, code_challenge
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    hass.data.setdefault(DOMAIN, {})
+class RavBariachOauth2Implementation(config_entry_oauth2_flow.LocalOAuth2Implementation):
+    def __init__(self, hass, domain, client_id, authorize_url, token_url) -> None:
 
-    try:
-        implementation = (
-            await config_entry_oauth2_flow.async_get_config_entry_implementation(
-                hass, entry
-            )
-        )
-    except Exception as e:
-        _LOGGER.warning("Implementation not ready yet, will retry: %s", e)
-        raise ConfigEntryNotReady from e
+        super().__init__(hass, domain, client_id, None, authorize_url, token_url)
 
-    session = config_entry_oauth2_flow.OAuth2Session(hass, entry, implementation)
+        self._pkce_data: dict[str, str] = {}
 
-    coordinator = RavBariachDataUpdateCoordinator(hass, session, entry)
+    @property
+    def name(self) -> str:
+        return "Rav Bariach"
 
-    try:
-        await session.async_ensure_token_valid()
-    except aiohttp.ClientResponseError as err:
-        if err.status == 401 :
-            _LOGGER.error(
-                "Authentication failed. Please re-authenticate the integration."
-            )
-            raise ConfigEntryAuthFailed(
-                translation_domain=DOMAIN,
-                translation_key="exceptions.auth_failed",
-            ) from err
-        elif err.status == 429:
-            _LOGGER.warning("Token refresh rate limit hit. Retrying later.")
-            raise ConfigEntryNotReady(
-                translation_domain=DOMAIN,
-                translation_key="exceptions.rate_limit_exceeded",
-            ) from err
-        else:
-            raise ConfigEntryNotReady(
-                translation_domain=DOMAIN,
-                translation_key="exceptions.unexpected_error",
-            ) from err
+    @property
+    def redirect_uri(self) -> str:
+        base_url = get_url(self.hass)
+        return f"{base_url}/auth/external/callback"
 
-    except Exception as err:
-        _LOGGER.error("Unexpected error ensuring token valid: %s", err)
-        raise ConfigEntryNotReady(
-            translation_domain=DOMAIN,
-            translation_key="exceptions.unexpected_error",
-        ) from err
-    try:
-        await coordinator.async_config_entry_first_refresh()
-    except Exception as err:
-        _LOGGER.error("Initial refresh failed: %s", err)
-        raise ConfigEntryNotReady(f"Could not connect to API: {err}")
+    async def async_generate_authorize_url(self, flow_id: str) -> str:
+        code_verifier, code_challenge = generate_pkce_pair()
 
-    try:
-        _LOGGER.debug("Initializing Gateway class...")
-        gateway = RavBariachGateway(hass, session, entry)
+        self.code_verifier = code_verifier
 
-        hass.data[DOMAIN][entry.entry_id] = {
-            "session": session,
-            "gateway": gateway,
-            "coordinator": coordinator,
+        url = await super().async_generate_authorize_url(flow_id)
+
+        return f"{url}&code_challenge={code_challenge}&code_challenge_method=S256"
+
+    async def async_resolve_external_data(self, external_data: dict) -> dict:
+        code = external_data.get("code")
+
+        if not self.code_verifier:
+            _LOGGER.error("PKCE code verifier not found")
+            raise ValueError("Missing PKCE code verifier")
+
+        session = async_get_clientsession(self.hass)
+
+        data = {
+            "grant_type": "authorization_code",
+            "code": code,
+            "redirect_uri": self.redirect_uri,
+            "client_id": self.client_id,
+            "code_verifier": self.code_verifier,
         }
 
-        entry.async_create_background_task(hass, gateway.start_listen(), "rav_bariach_ws_loop")
-
-        await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-        return True
-
-    except Exception as e:
-        _LOGGER.exception("Unexpected error occurred during setup: %s", e)
-        return False
+        async with session.post(self.token_url, data=data) as resp:
+            resp.raise_for_status()
+            return await resp.json()
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Unload a config entry."""
-    data = hass.data[DOMAIN].get(entry.entry_id)
+class RavBariachOauthConfigFlow(
+    config_entry_oauth2_flow.AbstractOAuth2FlowHandler, domain=DOMAIN
+):
 
-    if data:
-        gateway = data.get("gateway")
-        if gateway:
-            _LOGGER.debug("Disconnecting Gateway...")
-            await gateway.async_disconnect()
+    DOMAIN = DOMAIN
 
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    @property
+    def logger(self) -> logging.Logger:
+        """Return logger instance."""
+        return _LOGGER
 
-    if unload_ok:
-        hass.data[DOMAIN].pop(entry.entry_id)
-        _LOGGER.debug("Entry data removed from memory.")
+    async def async_step_user(self, user_input=None) -> ConfigFlowResult:
+        """Start OAuth flow triggered by the user in the UI."""
 
-    return unload_ok
-
-
-async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Handle removal of an entry."""
-    try:
-        implementation = (
-            await config_entry_oauth2_flow.async_get_config_entry_implementation(
-                hass, entry
-            )
+        implementations = await config_entry_oauth2_flow.async_get_implementations(
+            self.hass, DOMAIN
         )
-        session = config_entry_oauth2_flow.OAuth2Session(hass, entry, implementation)
 
-        disconnect_url = f"{FULLFILMENT_API_URI}/disconnect-user"
+        if DOMAIN not in implementations:
+            implementation = RavBariachOauth2Implementation(
+                self.hass,
+                DOMAIN,
+                PUBLIC_ID,
+                AUTH_URI,
+                TOKEN_URI,
+            )
+            config_entry_oauth2_flow.async_register_implementation(
+                self.hass, DOMAIN, implementation
+            )
 
-        _LOGGER.info("Integration is being removed, notifying server.")
-        resp = await session.async_request("POST", disconnect_url)
+        return await super().async_step_user(user_input)
 
-        _LOGGER.debug("Disconnect Response Code: %s", resp.status)
+    async def async_oauth_create_entry(self, data: dict) -> ConfigFlowResult:
+        try:
+            token_data = data["token"]["access_token"]
 
-        if resp.status < 400:
-            _LOGGER.info("User successfully disconnected from server.")
-        else:
-            text = await resp.text()
-            _LOGGER.warning("Server disconnect error: %s - Body: %s", resp.status, text)
+            decoded = jwt.decode(token_data, options={"verify_signature": False})
 
-    except (aiohttp.ClientError, TimeoutError) as err:
-        _LOGGER.warning("Could not reach server while removing integration: %s", err)
+            user_id = decoded.get("sub")
+
+            if not user_id:
+                raise KeyError("No 'sub' parameter found in token.")
+
+            await self.async_set_unique_id(user_id)
+
+            self._abort_if_unique_id_configured()
+
+        except (jwt.InvalidTokenError, KeyError):
+            _LOGGER.exception("Failed to parse token or extract user ID during setup")
+            return self.async_abort(reason="oauth_error")
+        return self.async_create_entry(title=f"Rav Bariach ({user_id})", data=data)

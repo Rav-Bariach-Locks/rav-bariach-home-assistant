@@ -32,7 +32,6 @@ async def async_setup_entry(
     devices = data_pack.get("devices", [])
 
     if not devices:
-        _LOGGER.warning("No devices found for Rav Bariach sensors")
         return
 
     entities = []
@@ -147,7 +146,7 @@ class RavBariachLockStatusSensor(SensorEntity, RestoreEntity):
         """Return the icon of the sensor."""
         try:
             status = int(self._data.get("status", 0))
-            return "mdi:lock" if status == 1 else "mdi:lock-open-variant"  # noqa: TRY300
+            return "mdi:lock" if status == 1 else "mdi:lock-open-variant"
         except (ValueError, TypeError):
             return "mdi:lock-question"
 
@@ -195,7 +194,7 @@ class RavBariachLockAvailabilitySensor(SensorEntity, RestoreEntity):
         try:
             is_online = int(self._data.get("isOnline", 0)) == 1
 
-            return "online" if is_online else "offline"  # noqa: TRY300
+            return "online" if is_online else "offline"
         except (ValueError, TypeError):
             return None
 

@@ -11,12 +11,14 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import config_entry_oauth2_flow
+from homeassistant.helpers.entity_platform import ConfigEntryAuthFailed
 
-from .const import AUTH_URI, DOMAIN, FULLFILMENT_API_URI, TOKEN_URI
+from .config_flow import RavBariachOauth2Implementation
+from .const import AUTH_URI, DOMAIN, FULLFILMENT_API_URI, PUBLIC_ID, TOKEN_URI
+from .coordinator import RavBariachDataUpdateCoordinator
 from .gateway import RavBariachGateway
 
 _LOGGER = logging.getLogger(__name__)
-
 
 
 PLATFORMS: list[Platform] = [
@@ -28,13 +30,12 @@ PLATFORMS: list[Platform] = [
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """OAuth provider implementation."""
 
-    implementation = config_entry_oauth2_flow.LocalOAuth2Implementation(
+    implementation = RavBariachOauth2Implementation(
         hass,
         DOMAIN,
-        client_id="",
-        client_secret="",
-        authorize_url=AUTH_URI,
-        token_url=TOKEN_URI,
+        PUBLIC_ID,
+        AUTH_URI,
+        TOKEN_URI,
     )
 
     config_entry_oauth2_flow.async_register_implementation(
@@ -47,7 +48,6 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up the integration from a config entry."""
     hass.data.setdefault(DOMAIN, {})
 
     try:
@@ -56,51 +56,66 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 hass, entry
             )
         )
-        _LOGGER.debug("OAuth Implementation successfully retrieved: %s", implementation)
-
     except Exception as e:
         _LOGGER.warning("Implementation not ready yet, will retry: %s", e)
         raise ConfigEntryNotReady from e
 
     session = config_entry_oauth2_flow.OAuth2Session(hass, entry, implementation)
 
-    if session.token:
-        _LOGGER.debug("Current Token Expires At: %s", session.token.get("expires_at"))
-    else:
-        _LOGGER.warning("No TOKEN found in the session!")
+    coordinator = RavBariachDataUpdateCoordinator(hass, session, entry)
 
     try:
-        _LOGGER.debug("Fetching devices from Rav Bariach API...")
-        resp = await session.async_request("POST", f"{FULLFILMENT_API_URI}/get-locks")
-        resp.raise_for_status()
-        json_data = await resp.json()
-        devices = json_data.get("data", {}).get("locks", [])
-        _LOGGER.debug("Successfully fetched %s devices.", len(devices))
+        await session.async_ensure_token_valid()
+    except aiohttp.ClientResponseError as err:
+        if err.status == 401 :
+            _LOGGER.error(
+                "Authentication failed. Please re-authenticate the integration."
+            )
+            raise ConfigEntryAuthFailed(
+                translation_domain=DOMAIN,
+                translation_key="exceptions.auth_failed",
+            ) from err
+        elif err.status == 429:
+            _LOGGER.warning("Token refresh rate limit hit. Retrying later.")
+            raise ConfigEntryNotReady(
+                translation_domain=DOMAIN,
+                translation_key="exceptions.rate_limit_exceeded",
+            ) from err
+        else:
+            raise ConfigEntryNotReady(
+                translation_domain=DOMAIN,
+                translation_key="exceptions.unexpected_error",
+            ) from err
+
     except Exception as err:
-        _LOGGER.error("Failed to fetch locks from API during setup: %s", err)
-        raise ConfigEntryNotReady("Could not fetch devices from API") from err
+        _LOGGER.error("Unexpected error ensuring token valid: %s", err)
+        raise ConfigEntryNotReady(
+            translation_domain=DOMAIN,
+            translation_key="exceptions.unexpected_error",
+        ) from err
+    try:
+        await coordinator.async_config_entry_first_refresh()
+    except Exception as err:
+        _LOGGER.error("Initial refresh failed: %s", err)
+        raise ConfigEntryNotReady(f"Could not connect to API: {err}")
 
     try:
         _LOGGER.debug("Initializing Gateway class...")
-        gateway = RavBariachGateway(hass, session)
+        gateway = RavBariachGateway(hass, session, entry)
 
         hass.data[DOMAIN][entry.entry_id] = {
             "session": session,
             "gateway": gateway,
-            "devices": devices
+            "coordinator": coordinator,
         }
 
-        _LOGGER.debug("Creating background task (WebSocket listen)...")
-        entry.async_create_background_task(hass, gateway.start_listen(), "rav-bariach_ws_loop")
+        entry.async_create_background_task(hass, gateway.start_listen(), "rav_bariach_ws_loop")
 
-        _LOGGER.debug("Forwarding platform setups: %s", PLATFORMS)
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-
-        _LOGGER.debug("async_setup_entry completed successfully.")
-        return True  # noqa: TRY300
+        return True
 
     except Exception as e:
-        _LOGGER.exception("Unexpected error occurred during setup: %s", e)  # noqa: TRY401
+        _LOGGER.exception("Unexpected error occurred during setup: %s", e)
         return False
 
 
@@ -144,9 +159,7 @@ async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
             _LOGGER.info("User successfully disconnected from server.")
         else:
             text = await resp.text()
-            _LOGGER.warning(
-                "Server disconnect error: %s - Body: %s", resp.status, text
-            )
+            _LOGGER.warning("Server disconnect error: %s - Body: %s", resp.status, text)
 
     except (aiohttp.ClientError, TimeoutError) as err:
         _LOGGER.warning("Could not reach server while removing integration: %s", err)

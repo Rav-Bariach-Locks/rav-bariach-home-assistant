@@ -40,7 +40,7 @@
     "issues": {
         "unsupported_version": {
             "title": "Nepodporovaná verze Home Assistant",
-            "description": "Integraci Desi se nepodařilo spustit, protože vaše verze Home Assistant je příliš stará.\n\nPodrobnosti: {error_detail}\n\nAktualizujte prosím svůj systém, abyste tento problém vyřešili."
+            "description": "Integraci Rav Bariach se nepodařilo spustit, protože vaše verze Home Assistant je příliš stará.\n\nPodrobnosti: {error_detail}\n\nAktualizujte prosím svůj systém, abyste tento problém vyřešili."
         }
     }
 }

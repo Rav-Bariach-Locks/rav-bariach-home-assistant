@@ -18,7 +18,6 @@ This custom integration allows you to control and monitor your **Rav Bariach Loc
 ## Features
 
 *  **Smart Lock Control:** Securely lock or unlock your Rav Bariach doors with ease.
-*  **Smart Relays:** Control additional RB modules and integrated features.
 *  **Real-time Status:** Monitor door status, connectivity, and alarm states instantly.
 
 ---
@@ -52,6 +51,13 @@ This integration is configured entirely via the Home Assistant UI (Config Flow).
 
 > [!WARNING]  
 > **Cloud Dependency:** This integration requires your Rav Bariach system to be connected to the internet and cloud services to be active. It relies on the cloud API to communicate with your locks.
+
+---
+
+---
+
+> [!WARNING]  
+> **Rate Limit:** Rate limits have been added to selected APIs to prevent excessive requests and protect server traffic. If the limit is exceeded, further requests may be temporarily blocked until the rate limit resets.
 
 ---
 
