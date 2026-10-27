@@ -34,6 +34,20 @@
                     "online": "Свързано",
                     "offline": "Несвързано"
                 }
+            },
+            "last_update": {
+                "name": "Last update"
+            }
+        },
+        "binary_sensor": {
+            "door": {
+                "name": "Door"
+            },
+            "jammed": {
+                "name": "Jammed"
+            },
+            "online": {
+                "name": "Online"
             }
         }
     },

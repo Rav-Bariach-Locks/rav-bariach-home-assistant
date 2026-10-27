@@ -34,6 +34,20 @@
                     "online": "מחובר",
                     "offline": "מנותק"
                 }
+            },
+            "last_update": {
+                "name": "עדכון אחרון"
+            }
+        },
+        "binary_sensor": {
+            "door": {
+                "name": "דלת"
+            },
+            "jammed": {
+                "name": "תקוע"
+            },
+            "online": {
+                "name": "מחובר"
             }
         }
     },

@@ -12,7 +12,7 @@
         "code_required": {
             "message": "For security reasons, you must enter a code to unlock."
         },
-                "rate_limit_exceeded": {
+        "rate_limit_exceeded": {
             "message": "Token refresh rate limit hit. Retrying later."
         }
     },
@@ -34,10 +34,24 @@
                     "online": "Connected",
                     "offline": "Disconnected"
                 }
+            },
+            "last_update": {
+                "name": "Last update"
+            }
+        },
+        "binary_sensor": {
+            "door": {
+                "name": "Door"
+            },
+            "jammed": {
+                "name": "Jammed"
+            },
+            "online": {
+                "name": "Online"
             }
         }
     },
-        "issues": {
+    "issues": {
         "unsupported_version": {
             "title": "Unsupported Home Assistant Version",
             "description": "The Rav Bariach integration could not be started because your Home Assistant version is too old.\n\nDetails: {error_detail}\n\nPlease update your system to resolve this issue."

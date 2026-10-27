@@ -7,24 +7,17 @@ import logging
 import aiohttp
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import config_entry_oauth2_flow
 from homeassistant.helpers.entity_platform import ConfigEntryAuthFailed
 
 from .config_flow import RavBariachOauth2Implementation
-from .const import AUTH_URI, DOMAIN, FULLFILMENT_API_URI, PUBLIC_ID, TOKEN_URI
+from .const import AUTH_URI, DOMAIN, FULLFILMENT_API_URI, PLATFORMS, PUBLIC_ID, TOKEN_URI
 from .coordinator import RavBariachDataUpdateCoordinator
 from .gateway import RavBariachGateway
 
 _LOGGER = logging.getLogger(__name__)
-
-
-PLATFORMS: list[Platform] = [
-    Platform.LOCK,
-    Platform.SENSOR
-]
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
@@ -102,6 +95,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     try:
         _LOGGER.debug("Initializing Gateway class...")
         gateway = RavBariachGateway(hass, session, entry)
+        gateway.on_reconnect = coordinator.async_refresh_after_reconnect
 
         hass.data[DOMAIN][entry.entry_id] = {
             "session": session,

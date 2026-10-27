@@ -1,6 +1,7 @@
 """Data Update Coordinator."""
 
 import logging
+import time
 from types import SimpleNamespace
 
 import async_timeout
@@ -12,13 +13,29 @@ from .const import DOMAIN, FULLFILMENT_API_URI
 
 _LOGGER = logging.getLogger(__name__)
 
+# get-locks is limited to 15 calls a day, so a reconnect refresh is allowed at
+# most once an hour; a flapping link must not burn the whole quota.
+RECONNECT_REFRESH_MIN_SECONDS = 3600
+
 
 class RavBariachDataUpdateCoordinator(DataUpdateCoordinator):
 
     def __init__(self, hass, session, entry):
-        super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=None)
+        super().__init__(
+            hass, _LOGGER, config_entry=entry, name=DOMAIN, update_interval=None
+        )
         self.session = session
         self.entry = entry
+        self._last_reconnect_refresh = 0.0
+
+    async def async_refresh_after_reconnect(self) -> None:
+        """Re-read the locks after a WebSocket reconnect, rate-limited."""
+        now = time.monotonic()
+        if now - self._last_reconnect_refresh < RECONNECT_REFRESH_MIN_SECONDS:
+            _LOGGER.debug("Skipping reconnect refresh (rate guard)")
+            return
+        self._last_reconnect_refresh = now
+        await self.async_request_refresh()
 
     async def _fetch_endpoint_data(self, endpoint: str, data_key: str) -> list:
         try:
@@ -52,6 +69,9 @@ class RavBariachDataUpdateCoordinator(DataUpdateCoordinator):
         try:
             async with async_timeout.timeout(15):
                 locks_data = await self._fetch_endpoint_data("get-locks", "locks")
+                if not locks_data and self.data is not None:
+                    # A failed re-read must not wipe the entities' data.
+                    raise UpdateFailed("get-locks returned no locks")
 
                 return SimpleNamespace(
                     locks=locks_data

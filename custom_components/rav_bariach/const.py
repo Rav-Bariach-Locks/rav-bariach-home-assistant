@@ -24,8 +24,9 @@ WS_URL = API_URL + SOCKET_PATH
 
 
 PLATFORMS = [
+    Platform.BINARY_SENSOR,
     Platform.LOCK,
-    Platform.SENSOR
+    Platform.SENSOR,
 ]
 
 
@@ -47,3 +48,7 @@ class LockIsJammed(IntEnum):
     OK = 0
     JAMMED = 1
 
+
+# Keys under which the API may report the door contact; only the first one
+# present in the lock record is used, and no door sensor is created without one.
+DOOR_STATE_KEYS = ("doorState", "doorStatus", "door_state", "isDoorOpen", "doorOpen")
