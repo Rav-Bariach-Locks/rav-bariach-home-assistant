@@ -51,7 +51,7 @@ class RavBariachDataUpdateCoordinator(DataUpdateCoordinator):
                 self.entry.disabled_by = ConfigEntryDisabler.USER
                 raise UpdateFailed(
                         translation_domain=DOMAIN,
-                        translation_key="exceptions.rate_limit_exceeded"
+                        translation_key="rate_limit_exceeded"
                     )
 
             response.raise_for_status()

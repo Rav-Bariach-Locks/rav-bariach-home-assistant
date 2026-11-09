@@ -14,6 +14,9 @@
         },
         "rate_limit_exceeded": {
             "message": "O limite de atualização do token foi atingido. Uma nova tentativa será feita mais tarde."
+        },
+        "unexpected_error": {
+            "message": "Erro inesperado ao conectar ao Rav Bariach. Será feita uma nova tentativa mais tarde."
         }
     },
     "entity": {

@@ -14,6 +14,9 @@
         },
         "rate_limit_exceeded": {
             "message": "Dosežena je bila omejitev osveževanja žetona. Poskus bo ponovljen pozneje."
+        },
+        "unexpected_error": {
+            "message": "Nepričakovana napaka pri povezovanju z Rav Bariach. Poskusili bomo znova pozneje."
         }
     },
     "entity": {

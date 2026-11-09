@@ -96,7 +96,7 @@ class RavBariachLock(RavBariachEntity, LockEntity):
                 self.entry.disabled_by = ConfigEntryDisabler.USER
                 raise ConfigEntryNotReady(
                     translation_domain=DOMAIN,
-                    translation_key="exceptions.rate_limit_exceeded"
+                    translation_key="rate_limit_exceeded"
                 ) from err
 
             raise

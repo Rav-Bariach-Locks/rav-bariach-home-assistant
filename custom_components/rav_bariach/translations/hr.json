@@ -14,6 +14,9 @@
         },
         "rate_limit_exceeded": {
             "message": "Dosegnuto je ograničenje za osvježavanje tokena. Ponovni pokušaj uslijedit će kasnije."
+        },
+        "unexpected_error": {
+            "message": "Neočekivana pogreška pri povezivanju s Rav Bariach. Pokušat ćemo ponovno kasnije."
         }
     },
     "entity": {

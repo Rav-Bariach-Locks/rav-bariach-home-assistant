@@ -34,7 +34,8 @@ class RavBariachEntity(Entity):
         self._coordinator = hub["coordinator"]
         self._data = data
         self._device_id = str(data.get("deviceId"))
-        self.last_update: datetime | None = None
+        # Entities are built right after the initial get-locks read.
+        self.last_update: datetime | None = dt_util.utcnow()
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
