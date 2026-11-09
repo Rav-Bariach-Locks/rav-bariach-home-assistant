@@ -7,24 +7,20 @@ import logging
 import aiohttp
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import config_entry_oauth2_flow
+import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity_platform import ConfigEntryAuthFailed
 
 from .config_flow import RavBariachOauth2Implementation
-from .const import AUTH_URI, DOMAIN, FULLFILMENT_API_URI, PUBLIC_ID, TOKEN_URI
+from .const import AUTH_URI, DOMAIN, FULLFILMENT_API_URI, PLATFORMS, PUBLIC_ID, TOKEN_URI
 from .coordinator import RavBariachDataUpdateCoordinator
 from .gateway import RavBariachGateway
 
 _LOGGER = logging.getLogger(__name__)
 
-
-PLATFORMS: list[Platform] = [
-    Platform.LOCK,
-    Platform.SENSOR
-]
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
@@ -73,25 +69,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             )
             raise ConfigEntryAuthFailed(
                 translation_domain=DOMAIN,
-                translation_key="exceptions.auth_failed",
+                translation_key="auth_failed",
             ) from err
         elif err.status == 429:
             _LOGGER.warning("Token refresh rate limit hit. Retrying later.")
             raise ConfigEntryNotReady(
                 translation_domain=DOMAIN,
-                translation_key="exceptions.rate_limit_exceeded",
+                translation_key="rate_limit_exceeded",
             ) from err
         else:
             raise ConfigEntryNotReady(
                 translation_domain=DOMAIN,
-                translation_key="exceptions.unexpected_error",
+                translation_key="unexpected_error",
             ) from err
 
     except Exception as err:
         _LOGGER.error("Unexpected error ensuring token valid: %s", err)
         raise ConfigEntryNotReady(
             translation_domain=DOMAIN,
-            translation_key="exceptions.unexpected_error",
+            translation_key="unexpected_error",
         ) from err
     try:
         await coordinator.async_config_entry_first_refresh()
@@ -102,6 +98,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     try:
         _LOGGER.debug("Initializing Gateway class...")
         gateway = RavBariachGateway(hass, session, entry)
+        gateway.on_reconnect = coordinator.async_refresh_after_reconnect
 
         hass.data[DOMAIN][entry.entry_id] = {
             "session": session,

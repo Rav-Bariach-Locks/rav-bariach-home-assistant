@@ -14,6 +14,9 @@
         },
         "rate_limit_exceeded": {
             "message": "La limite d'actualisation du jeton a été atteinte. Une nouvelle tentative sera effectuée ultérieurement."
+        },
+        "unexpected_error": {
+            "message": "Erreur inattendue lors de la connexion à Rav Bariach. Nouvelle tentative plus tard."
         }
     },
     "entity": {
@@ -34,6 +37,20 @@
                     "online": "Connecté",
                     "offline": "Déconnecté"
                 }
+            },
+            "last_update": {
+                "name": "Last update"
+            }
+        },
+        "binary_sensor": {
+            "door": {
+                "name": "Door"
+            },
+            "jammed": {
+                "name": "Jammed"
+            },
+            "online": {
+                "name": "Online"
             }
         }
     },

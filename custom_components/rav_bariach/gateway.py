@@ -4,17 +4,22 @@ import asyncio
 import json
 import logging
 import re
-from typing import Any
+import time
+from typing import Any, Callable
 
 import aiohttp
 
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import DOMAIN, WS_URL
+from .const import WS_URL
 
 _LOGGER = logging.getLogger(__name__)
+
+# Reconnect back-off: quick retries first, then settle at 90 s.
+RECONNECT_DELAYS = (5, 15, 30, 90)
+# A connection that lasted this long resets the back-off.
+STABLE_CONNECTION_SECONDS = 120
 
 
 def parse_json_safe(data: str) -> dict[str, Any] | None:
@@ -36,10 +41,15 @@ class RavBariachGateway:
         """Initilize the gateway connection."""
         self.hass = hass
         self._session = session
-        self._listeners = {}
+        self._listeners: dict[str, list[Callable]] = {}
+        self._conn_listeners: list[Callable[[bool], None]] = []
         self._ws = None
         self._stopping = False
         self.entry = entry
+        self.connected = False
+        self.connect_count = 0
+        self.last_message_at: float | None = None
+        self.on_reconnect: Callable[[], Any] | None = None
 
     def register_listener(self, device_id, callback):
         """Register a callback for a specific device."""
@@ -53,24 +63,43 @@ class RavBariachGateway:
 
         return remove_listener
 
+    def register_connection_listener(self, callback: Callable[[bool], None]):
+        """Register a callback that gets the connection state on every change."""
+        self._conn_listeners.append(callback)
+
+        def remove_listener():
+            if callback in self._conn_listeners:
+                self._conn_listeners.remove(callback)
+
+        return remove_listener
+
+    def _set_connected(self, value: bool) -> None:
+        if self.connected == value:
+            return
+        self.connected = value
+        for callback in list(self._conn_listeners):
+            try:
+                callback(value)
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Connection listener error")
+
     async def start_listen(self) -> None:
         """Start the WebSocket listening."""
         _LOGGER.debug("Gateway starts listening...")
         websession = async_get_clientsession(self.hass)
+        attempt = 0
 
         while not self._stopping:
+            connected_at = None
             try:
                 try:
                     await self._session.async_ensure_token_valid()
-                except Exception as err:
-                                if getattr(err, "status", None) == 429:
-                                    _LOGGER.warning("Token refresh rate limit hit. Retrying later.")
-                                    raise ConfigEntryNotReady(
-                                        translation_domain=DOMAIN,
-                                        translation_key="exceptions.rate_limit_exceeded"
-                                    ) from err
-
-                                raise
+                except Exception as err:  # pylint: disable=broad-except
+                    if getattr(err, "status", None) == 429:
+                        _LOGGER.warning("Token refresh rate limit hit. Retrying later.")
+                    else:
+                        _LOGGER.warning("Token refresh failed: %s", err)
+                    raise
 
                 token = self._session.token["access_token"]
 
@@ -86,7 +115,14 @@ class RavBariachGateway:
                     heartbeat=30,
                 ) as ws:
                     self._ws = ws
-                    _LOGGER.info("WebSocket Connected!")
+                    connected_at = time.monotonic()
+                    self.connect_count += 1
+                    _LOGGER.info("WebSocket connected (connection #%s)", self.connect_count)
+                    self._set_connected(True)
+
+                    if self.connect_count > 1 and self.on_reconnect is not None:
+                        # State may have changed while we were away.
+                        self.hass.async_create_task(self.on_reconnect())
 
                     async for msg in ws:
                         if self._stopping:
@@ -96,24 +132,38 @@ class RavBariachGateway:
                             await self._handle_message_async(msg.data)
 
                         elif msg.type == aiohttp.WSMsgType.CLOSED:
-                            _LOGGER.warning("WebSocket kapandı (Remote Closed)")
+                            _LOGGER.warning("WebSocket closed by the server")
                             break
                         elif msg.type == aiohttp.WSMsgType.ERROR:
-                            _LOGGER.error("WebSocket hatası!")
+                            _LOGGER.error("WebSocket error: %s", ws.exception())
                             break
 
             except aiohttp.ClientError as client_err:
                 _LOGGER.error("WebSocket connection error: %s", client_err)
-            except Exception:
+            except asyncio.CancelledError:
+                raise
+            except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("WebSocket connection error")
-            if not self._stopping:
-                _LOGGER.debug("Socket disconnected, retrying in 90 seconds...")
-                await asyncio.sleep(90)
+            finally:
+                self._ws = None
+                self._set_connected(False)
+
+            if self._stopping:
+                break
+
+            if connected_at and time.monotonic() - connected_at > STABLE_CONNECTION_SECONDS:
+                attempt = 0
+            delay = RECONNECT_DELAYS[min(attempt, len(RECONNECT_DELAYS) - 1)]
+            attempt += 1
+            _LOGGER.debug("Socket disconnected, retrying in %s seconds...", delay)
+            await asyncio.sleep(delay)
 
     async def _handle_message_async(self, data: str):
         """Process incoming WebSocket messages without blocking the event loop."""
+        _LOGGER.debug("WS message: %s", data)
+        self.last_message_at = time.time()
 
-        json_data = await self.hass.async_add_executor_job(parse_json_safe, data)
+        json_data = parse_json_safe(data)
 
         if json_data is None:
             _LOGGER.warning(
@@ -136,7 +186,7 @@ class RavBariachGateway:
                 for callback in self._listeners[device_id]:
                     try:
                         callback(payload)
-                    except Exception:
+                    except Exception:  # pylint: disable=broad-except
                         _LOGGER.exception(
                             "Callback execution error for device: %s", device_id
                         )

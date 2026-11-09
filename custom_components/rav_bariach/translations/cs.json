@@ -14,6 +14,9 @@
         },
         "rate_limit_exceeded": {
             "message": "Byl dosažen limit pro obnovení tokenu. Opakování proběhne později."
+        },
+        "unexpected_error": {
+            "message": "Neočekávaná chyba při připojování k Rav Bariach. Pokus se zopakuje později."
         }
     },
     "entity": {
@@ -34,6 +37,20 @@
                     "online": "Připojeno",
                     "offline": "Odpojeno"
                 }
+            },
+            "last_update": {
+                "name": "Last update"
+            }
+        },
+        "binary_sensor": {
+            "door": {
+                "name": "Door"
+            },
+            "jammed": {
+                "name": "Jammed"
+            },
+            "online": {
+                "name": "Online"
             }
         }
     },

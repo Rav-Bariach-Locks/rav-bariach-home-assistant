@@ -14,6 +14,9 @@
         },
         "rate_limit_exceeded": {
             "message": "A fost atinsă limita pentru reîmprospătarea tokenului. Se va încerca din nou mai târziu."
+        },
+        "unexpected_error": {
+            "message": "Eroare neașteptată la conectarea la Rav Bariach. Se va reîncerca mai târziu."
         }
     },
     "entity": {
@@ -34,6 +37,20 @@
                     "online": "Conectat",
                     "offline": "Deconectat"
                 }
+            },
+            "last_update": {
+                "name": "Last update"
+            }
+        },
+        "binary_sensor": {
+            "door": {
+                "name": "Door"
+            },
+            "jammed": {
+                "name": "Jammed"
+            },
+            "online": {
+                "name": "Online"
             }
         }
     },

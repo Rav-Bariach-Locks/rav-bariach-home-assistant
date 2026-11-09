@@ -14,6 +14,9 @@
         },
         "rate_limit_exceeded": {
             "message": "Достигнато е ограничувањето за освежување на токенот. Повторниот обид ќе се изврши подоцна."
+        },
+        "unexpected_error": {
+            "message": "Неочекувана грешка при поврзување со Rav Bariach. Ќе се обиде повторно подоцна."
         }
     },
     "entity": {
@@ -34,6 +37,20 @@
                     "online": "Поврзано",
                     "offline": "Неповрзано"
                 }
+            },
+            "last_update": {
+                "name": "Last update"
+            }
+        },
+        "binary_sensor": {
+            "door": {
+                "name": "Door"
+            },
+            "jammed": {
+                "name": "Jammed"
+            },
+            "online": {
+                "name": "Online"
             }
         }
     },

@@ -14,6 +14,9 @@
         },
         "rate_limit_exceeded": {
             "message": "הגעת למגבלת רענון האסימון. ניסיון נוסף יתבצע מאוחר יותר."
+        },
+        "unexpected_error": {
+            "message": "שגיאה לא צפויה בהתחברות לרב בריח. ננסה שוב מאוחר יותר."
         }
     },
     "entity": {
@@ -34,6 +37,20 @@
                     "online": "מחובר",
                     "offline": "מנותק"
                 }
+            },
+            "last_update": {
+                "name": "עדכון אחרון"
+            }
+        },
+        "binary_sensor": {
+            "door": {
+                "name": "דלת"
+            },
+            "jammed": {
+                "name": "תקוע"
+            },
+            "online": {
+                "name": "מחובר"
             }
         }
     },

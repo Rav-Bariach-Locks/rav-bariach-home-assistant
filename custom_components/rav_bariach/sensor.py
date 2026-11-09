@@ -8,13 +8,12 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE
+from homeassistant.const import PERCENTAGE, EntityCategory
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.restore_state import RestoreEntity
 
 from .const import DOMAIN
+from .entity import RavBariachEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -25,180 +24,104 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Rav Bariach Lock sensors from a config entry."""
-    data_pack = hass.data[DOMAIN][entry.entry_id]
-    session = data_pack["session"]
-    gateway = data_pack["gateway"]
-
-    devices = data_pack.get("devices", [])
-
-    if not devices:
-        return
+    hub = hass.data[DOMAIN][entry.entry_id]
+    devices = hub["coordinator"].data.locks
 
     entities = []
     for device_data in devices:
-        entities.append(RavBariachBatterySensor(session, gateway, device_data))
-        entities.append(RavBariachLockStatusSensor(session, gateway, device_data))
-        entities.append(RavBariachLockAvailabilitySensor(session, gateway, device_data))
-    async_add_entities(entities, update_before_add=True)
+        entities.append(RavBariachBatterySensor(hub, device_data))
+        entities.append(RavBariachLockStatusSensor(hub, device_data))
+        entities.append(RavBariachLockAvailabilitySensor(hub, device_data))
+        entities.append(RavBariachLastUpdateSensor(hub, device_data))
+    async_add_entities(entities)
 
 
-class RavBariachBatterySensor(SensorEntity, RestoreEntity):
+class RavBariachBatterySensor(RavBariachEntity, SensorEntity):
     """Representation of a Rav Bariach Lock Battery Sensor."""
 
-    _attr_has_entity_name = True
     _attr_translation_key = "battery_status"
     _attr_device_class = SensorDeviceClass.BATTERY
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_state_class = SensorStateClass.MEASUREMENT
 
-    def __init__(self, session, gateway, data):
-        """Initialize the sensor."""
-        self._session = session
-        self._gateway = gateway
-        self._data = data
-        self._device_id = str(data.get("deviceId"))
+    def __init__(self, hub, data):
+        super().__init__(hub, data)
         self._attr_unique_id = f"rav_bariach_lock_battery_{self._device_id}"
-
-    async def async_added_to_hass(self) -> None:
-        """Register callbacks when entity is added to Home Assistant."""
-        await super().async_added_to_hass()
-
-        self.async_on_remove(
-            async_dispatcher_connect(
-                self.hass, f"update_{self._device_id}", self._handle_update
-            )
-        )
-
-    def _handle_update(self, msg_data=None):
-        """Handle updated state data received from WebSocket."""
-        if isinstance(msg_data, dict):
-            self._data.update(msg_data)
-
-        self.schedule_update_ha_state()
-
-    @property
-    def device_info(self):
-        """Return device registry information for Home Assistant."""
-        return {
-            "identifiers": {(DOMAIN, self._device_id)}
-        }
 
     @property
     def native_value(self):
         """Return the state of the sensor (Battery Level)."""
-        try:
-            return int(self._data.get("batteryLevel", 0))
-        except (ValueError, TypeError):
-            return None
+        return self._int("batteryLevel")
 
 
-class RavBariachLockStatusSensor(SensorEntity, RestoreEntity):
+class RavBariachLockStatusSensor(RavBariachEntity, SensorEntity):
     """Representation of a Rav Bariach Lock State Sensor."""
 
-    _attr_has_entity_name = True
     _attr_translation_key = "lock_status"
-    _attr_icon = "mdi:lock"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = ["locked", "unlocked"]
 
-    def __init__(self, session, gateway, data):
-        """Initialize the sensor."""
-        self._session = session
-        self._gateway = gateway
-        self._data = data
-        self._device_id = str(data.get("deviceId"))
+    def __init__(self, hub, data):
+        super().__init__(hub, data)
         self._attr_unique_id = f"rav_bariach_lock_status_{self._device_id}"
-
-    async def async_added_to_hass(self) -> None:
-        """Register callbacks when entity is added to Home Assistant."""
-        await super().async_added_to_hass()
-
-        self.async_on_remove(
-            async_dispatcher_connect(
-                self.hass, f"update_{self._device_id}", self._handle_update
-            )
-        )
-
-    def _handle_update(self, msg_data=None):
-        """Handle updated state data received from WebSocket."""
-        if isinstance(msg_data, dict):
-            self._data.update(msg_data)
-        self.schedule_update_ha_state()
-
-    @property
-    def device_info(self):
-        """Return device registry information for Home Assistant."""
-        return {
-            "identifiers": {(DOMAIN, self._device_id)}
-        }
 
     @property
     def native_value(self):
         """Return the state of the sensor."""
-        try:
-            status = int(self._data.get("status"))
-
-            return {0: "unlocked", 1: "locked"}.get(status)
-
-        except (ValueError, TypeError):
-            return None
+        return {0: "unlocked", 1: "locked"}.get(self._int("status"))
 
     @property
     def icon(self):
         """Return the icon of the sensor."""
-        try:
-            status = int(self._data.get("status", 0))
-            return "mdi:lock" if status == 1 else "mdi:lock-open-variant"
-        except (ValueError, TypeError):
+        status = self._int("status")
+        if status is None:
             return "mdi:lock-question"
+        return "mdi:lock" if status == 1 else "mdi:lock-open-variant"
 
-class RavBariachLockAvailabilitySensor(SensorEntity, RestoreEntity):
+
+class RavBariachLockAvailabilitySensor(RavBariachEntity, SensorEntity):
     """Representation of a Rav Bariach Lock Online - Offline Sensor."""
 
-    _attr_has_entity_name = True
     _attr_translation_key = "hub_status"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = ["online", "offline"]
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
-    def __init__(self, session, gateway, data):
-        """Initialize the sensor."""
-        self._session = session
-        self._gateway = gateway
-        self._data = data
-        self._device_id = str(data.get("deviceId"))
+    def __init__(self, hub, data):
+        super().__init__(hub, data)
         self._attr_unique_id = f"rav_bariach_lock_online_{self._device_id}"
 
-    async def async_added_to_hass(self) -> None:
-        """Register callbacks when entity is added to Home Assistant."""
-        await super().async_added_to_hass()
-
-        self.async_on_remove(
-            async_dispatcher_connect(
-                self.hass, f"update_{self._device_id}", self._handle_update
-            )
-        )
-
-    def _handle_update(self, msg_data=None):
-        """Handle updated state data received from WebSocket."""
-        if isinstance(msg_data, dict):
-            self._data.update(msg_data)
-
-        self.schedule_update_ha_state()
-
     @property
-    def device_info(self):
-        """Return device registry information for Home Assistant."""
-        return {
-            "identifiers": {(DOMAIN, self._device_id)}
-        }
+    def available(self) -> bool:
+        # Shows "offline" rather than going unavailable with the lock.
+        return self._gateway.connected
 
     @property
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
-        try:
-            is_online = int(self._data.get("isOnline", 0)) == 1
-
-            return "online" if is_online else "offline"
-        except (ValueError, TypeError):
-            return None
+        return "online" if self.lock_online else "offline"
 
     @property
     def icon(self) -> str:
         """Return the icon of the sensor."""
         return "mdi:router-wireless" if self.native_value == "online" else "mdi:router-wireless-off"
+
+
+class RavBariachLastUpdateSensor(RavBariachEntity, SensorEntity):
+    """When the lock last reported anything (WebSocket push or re-read)."""
+
+    _attr_translation_key = "last_update"
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, hub, data):
+        super().__init__(hub, data)
+        self._attr_unique_id = f"rav_bariach_lock_last_update_{self._device_id}"
+
+    @property
+    def available(self) -> bool:
+        return True
+
+    @property
+    def native_value(self):
+        return self.last_update

@@ -14,6 +14,9 @@
         },
         "rate_limit_exceeded": {
             "message": "De limiet voor het vernieuwen van het token is bereikt. Er wordt later opnieuw geprobeerd."
+        },
+        "unexpected_error": {
+            "message": "Onverwachte fout bij het verbinden met Rav Bariach. Er wordt later opnieuw geprobeerd."
         }
     },
     "entity": {
@@ -34,6 +37,20 @@
                     "online": "Verbonden",
                     "offline": "Niet verbonden"
                 }
+            },
+            "last_update": {
+                "name": "Last update"
+            }
+        },
+        "binary_sensor": {
+            "door": {
+                "name": "Door"
+            },
+            "jammed": {
+                "name": "Jammed"
+            },
+            "online": {
+                "name": "Online"
             }
         }
     },
