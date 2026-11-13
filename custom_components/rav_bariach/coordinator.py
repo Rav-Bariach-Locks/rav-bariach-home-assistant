@@ -26,12 +26,13 @@ class RavBariachDataUpdateCoordinator(DataUpdateCoordinator):
         )
         self.session = session
         self.entry = entry
-        self._last_reconnect_refresh = 0.0
+        self._last_reconnect_refresh: float | None = None
 
     async def async_refresh_after_reconnect(self) -> None:
         """Re-read the locks after a WebSocket reconnect, rate-limited."""
         now = time.monotonic()
-        if now - self._last_reconnect_refresh < RECONNECT_REFRESH_MIN_SECONDS:
+        last = self._last_reconnect_refresh
+        if last is not None and now - last < RECONNECT_REFRESH_MIN_SECONDS:
             _LOGGER.debug("Skipping reconnect refresh (rate guard)")
             return
         self._last_reconnect_refresh = now

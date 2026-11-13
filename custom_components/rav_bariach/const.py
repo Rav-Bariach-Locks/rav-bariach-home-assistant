@@ -48,6 +48,10 @@ class LockIsJammed(IntEnum):
     OK = 0
     JAMMED = 1
 
+DISCONNECT_TIMEOUT = 10
+DISCONNECT_MAX_ATTEMPTS = 3
+DISCONNECT_RETRY_DELAY = 2
+TOKEN_REFRESH_MARGIN = 60
 
 # Keys under which the API may report the door contact; only the first one
 # present in the lock record is used, and no door sensor is created without one.

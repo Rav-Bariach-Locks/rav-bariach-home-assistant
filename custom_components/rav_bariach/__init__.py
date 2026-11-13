@@ -2,19 +2,32 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
+import time
 
 import aiohttp
-
+import homeassistant.helpers.config_validation as cv
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import config_entry_oauth2_flow
-import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity_platform import ConfigEntryAuthFailed
 
 from .config_flow import RavBariachOauth2Implementation
-from .const import AUTH_URI, DOMAIN, FULLFILMENT_API_URI, PLATFORMS, PUBLIC_ID, TOKEN_URI
+from .const import (
+    AUTH_URI,
+    DISCONNECT_MAX_ATTEMPTS,
+    DISCONNECT_RETRY_DELAY,
+    DISCONNECT_TIMEOUT,
+    DOMAIN,
+    FULLFILMENT_API_URI,
+    PLATFORMS,
+    PUBLIC_ID,
+    TOKEN_REFRESH_MARGIN,
+    TOKEN_URI,
+)
 from .coordinator import RavBariachDataUpdateCoordinator
 from .gateway import RavBariachGateway
 
@@ -135,28 +148,63 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return unload_ok
 
 
-async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Handle removal of an entry."""
+async def _try_disconnect(
+    http: aiohttp.ClientSession, url: str, access_token: str
+) -> bool | None:
+    """Send a disconnect request to the server."""
     try:
-        implementation = (
-            await config_entry_oauth2_flow.async_get_config_entry_implementation(
-                hass, entry
-            )
-        )
-        session = config_entry_oauth2_flow.OAuth2Session(hass, entry, implementation)
-
-        disconnect_url = f"{FULLFILMENT_API_URI}/disconnect-user"
-
-        _LOGGER.info("Integration is being removed, notifying server.")
-        resp = await session.async_request("POST", disconnect_url)
-
-        _LOGGER.debug("Disconnect Response Code: %s", resp.status)
-
-        if resp.status < 400:
-            _LOGGER.info("User successfully disconnected from server.")
-        else:
-            text = await resp.text()
-            _LOGGER.warning("Server disconnect error: %s - Body: %s", resp.status, text)
-
+        async with http.post(
+            url,
+            headers={"Authorization": f"Bearer {access_token}"},
+            timeout=aiohttp.ClientTimeout(total=DISCONNECT_TIMEOUT),
+        ) as resp:
+            if resp.status < 400:
+                return True
+            _LOGGER.warning("Disconnect request failed with status %s", resp.status)
+            return None if resp.status >= 500 else False
     except (aiohttp.ClientError, TimeoutError) as err:
-        _LOGGER.warning("Could not reach server while removing integration: %s", err)
+        _LOGGER.warning("Disconnect request failed: %s", err)
+        return None
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Notify the server when a config entry is removed."""
+    url = f"{FULLFILMENT_API_URI}/disconnect-user"
+    http = async_get_clientsession(hass)
+    token_data = dict(entry.data.get("token") or {})
+
+    # Refresh the token first if it is expired or about to expire.
+    if token_data.get("expires_at", 0) - time.time() < TOKEN_REFRESH_MARGIN:
+        _LOGGER.debug(
+            "Access token is expired or expiring, refreshing before disconnect"
+        )
+        try:
+            implementation = (
+                await config_entry_oauth2_flow.async_get_config_entry_implementation(
+                    hass, entry
+                )
+            )
+            token_data = await implementation.async_refresh_token(token_data)
+        except Exception as err:  # noqa: BLE001
+            _LOGGER.warning(
+                "Token refresh failed, falling back to stored token: %s", err
+            )
+
+    access_token = token_data.get("access_token")
+    if not access_token:
+        _LOGGER.warning("No access token available, unable to notify server")
+        return
+
+    for attempt in range(DISCONNECT_MAX_ATTEMPTS):
+        result = await _try_disconnect(http, url, access_token)
+        if result is True:
+            _LOGGER.debug("Server notified of disconnect")
+            return
+        if result is False:
+            break
+        if attempt < DISCONNECT_MAX_ATTEMPTS - 1:
+            await asyncio.sleep(DISCONNECT_RETRY_DELAY * (attempt + 1))
+
+    _LOGGER.warning(
+        "Could not notify server of disconnect, relying on server-side cleanup"
+    )
